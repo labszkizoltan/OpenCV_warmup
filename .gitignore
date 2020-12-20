@@ -1,0 +1,10 @@
+# Directories
+OpenCV_warmup/.vs/*
+OpenCV_warmup/x64/*
+
+# Files
+*\.vs/*
+*\.dll
+*\.cu
+
+
