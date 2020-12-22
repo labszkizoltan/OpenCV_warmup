@@ -85,10 +85,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="functions\functions.cpp" />
-    <ClCompile Include="VideoCapture_main.cpp" />
+    <ClCompile Include="functions\motion_detector.cpp" />
+    <ClCompile Include="MultipleCamera_main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="functions\functions.h" />
+    <ClInclude Include="functions\motion_detector.h" />
+    <ClInclude Include="global_constants.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -86,16 +86,18 @@ int main()
 	cv::Mat current_frame_gscl, prev_frame_gscl; // grayscale images
 	cv::Mat diff, threshold_img, smooth_threshold_img;
 
-	cv::VideoCapture vid(0);
-	if (!vid.isOpened()) { return -1; }
+	cv::VideoCapture camera1(0);
+//	cv::VideoCapture camera2(1); // 
+	if (!camera1.isOpened()) { return -1; }
+//	if (!camera2.isOpened()) { return -1; }
 
-	vid.read(current_frame);
+	camera1.read(current_frame);
 	current_frame.copyTo(prev_frame);
 
 	while (is_running)
 	{
 		current_frame.copyTo(prev_frame);
-		vid.read(current_frame);
+		camera1.read(current_frame);
 
 		cv::cvtColor(current_frame, current_frame_gscl, cv::COLOR_BGR2GRAY);
 		cv::cvtColor(prev_frame, prev_frame_gscl, cv::COLOR_BGR2GRAY);

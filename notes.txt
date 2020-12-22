@@ -1,0 +1,3 @@
+
+With DroidCam I can use my cellphone as a USB webcamera. And OpenCV can detect it as well with " cv::VideoCapture vid(1); ".
+
