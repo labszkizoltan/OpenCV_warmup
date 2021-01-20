@@ -19,6 +19,7 @@ https://www.youtube.com/watch?v=X6rPdRZzgjg
 #include<iostream>
 #include<vector>
 #include<cstdint>
+#include<algorithm>
 
 #include "functions/motion_detector.h"
 
@@ -35,19 +36,20 @@ int main()
 	{
 
 		detector_1.Update();
-		detector_1.SearchForMovement();
+//		detector_1.SearchForMovement();
+		detector_1.SearchForMovement2(20);
 		detector_1.DrawPrevious("Webcam");
 
-		detector_2.Update();
-		detector_2.SearchForMovement();
-		detector_2.DrawPrevious("CellphoneCamera");
+//		detector_2.Update();
+//		detector_2.SearchForMovement();
+//		detector_2.DrawPrevious("CellphoneCamera");
 
 		if (cv::waitKey(1000 / g_fps) == 27)
 		{
 			is_running = false;
-//			cv::destroyWindow("diff");
 		} // if esc key is pressed, exit loop
 	}
+
 
 	return 0;
 }

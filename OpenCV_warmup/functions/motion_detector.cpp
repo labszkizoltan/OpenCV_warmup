@@ -2,6 +2,8 @@
 #include "motion_detector.h"
 #include "../global_constants.h"
 
+#include<algorithm>
+#include <limits>
 
 // utility function used in SearchForMovement(...)
 std::string intToString(int number) {
@@ -87,6 +89,45 @@ void MotionDetector::SearchForMovement()
 }
 
 
+void MotionDetector::SearchForMovement2(int resolution)
+{
+//	m_X = 0;
+//	m_Y = 0;
+//	HierarchicalMovementSearch(0, 3, m_Threshold_img);
+
+
+	int size = std::min(m_Threshold_img.size().width, m_Threshold_img.size().height) / resolution;
+	int x0 = 0, y0 = 0, rect_width = size, rect_height = size;
+
+	int steps_x = m_Threshold_img.size().width / (size / 2); // stepside is size/2
+	int steps_y = m_Threshold_img.size().height / (size / 2);
+
+	//int max_x = -1.0f, max_y = -1.0f; // upper left corner of the rectangle that contained the highest saturation
+	float max_saturation = 0.0f;
+
+	for (int i = 0; i < steps_x; i++)
+	{
+		x0 = i*size/2 > m_Threshold_img.size().width ? m_Threshold_img.size().width : i * size / 2; // dont let the starting point roll outside the region, that causes memory access violation
+		rect_width = std::min(size, m_Threshold_img.size().width - x0); // same as above
+
+		for (int j = 0; j < steps_y; j++)
+		{
+			y0 = j*size/2 > m_Threshold_img.size().height ? m_Threshold_img.size().height : j * size / 2;
+			rect_height = std::min(size, m_Threshold_img.size().height - y0);
+
+			cv::Mat temp(m_Threshold_img, cv::Rect(x0, y0, rect_width, rect_height)); // using a rectangle
+
+			float current_saturation = cv::sum(temp)[0] / (float)(255 * temp.size().width * temp.size().height);
+			m_X = current_saturation > max_saturation ? x0 : m_X;
+			m_Y = current_saturation > max_saturation ? y0 : m_Y;
+		}
+	}
+
+	// draw some markers on the object:
+	cv::circle(m_Prev_Frame, cv::Point(m_X + size / 2, m_Y + size / 2), size / 2, cv::Scalar(0, 255, 0), 2);
+}
+
+
 
 void MotionDetector::DrawCurrent(const std::string& window_name)
 {
@@ -122,6 +163,55 @@ void MotionDetector::Init()
 	cv::threshold(m_Diff, m_Threshold_img, g_sensitivity_value, 255, cv::THRESH_BINARY);
 //	cv::blur(m_Threshold_img, m_Threshold_img, cv::Size(g_blur_size, g_blur_size));
 //	cv::threshold(m_Threshold_img, m_Threshold_img, g_sensitivity_value, 255, cv::THRESH_BINARY);
+}
+
+
+// this is going to be a recursive function
+void MotionDetector::HierarchicalMovementSearch(int depth, int max_depth, cv::Mat& partial_threshold_img)
+{
+	if (depth == max_depth)
+	{
+		// draw some markers on the object:
+		cv::circle(m_Prev_Frame, cv::Point(m_X, m_Y), 20, cv::Scalar(0, 255, 0), 2);
+	}
+	else
+	{
+		int size = std::min(partial_threshold_img.size().width, partial_threshold_img.size().height) / 4;
+		int x0 = 0, y0 = 0, rect_width = size, rect_height = size;
+
+		int steps_x = 2*partial_threshold_img.size().width / size; // stepsize is size/2
+		int steps_y = 2*partial_threshold_img.size().height / size;
+
+		int max_x = 0.0f, max_y = 0.0f; // upper left corner of the rectangle that contained the highest saturation
+		float max_saturation = 0.0f;
+
+		for (int i = 0; i < steps_x; i++)
+		{
+			x0 = i * size / 2 > partial_threshold_img.size().width ? partial_threshold_img.size().width : i * size / 2; // dont let the starting point roll outside the region, that causes memory access violation
+			rect_width = std::min(size, partial_threshold_img.size().width - x0); // same as above
+
+			for (int j = 0; j < steps_y; j++)
+			{
+				y0 = j * size / 2 > partial_threshold_img.size().height ? partial_threshold_img.size().height : j * size / 2;
+				rect_height = std::min(size, partial_threshold_img.size().height - y0);
+
+				cv::Mat temp(partial_threshold_img, cv::Rect(x0, y0, rect_width, rect_height)); // using a rectangle
+
+				float current_saturation = cv::sum(temp)[0] / (float)(255 * temp.size().width * temp.size().height);
+				max_x = current_saturation > max_saturation ? x0 : max_x;
+				max_y = current_saturation > max_saturation ? y0 : max_y;
+			}
+		}
+
+		m_X += max_x;
+		m_Y += max_y;
+
+		cv::Mat temp(partial_threshold_img, cv::Rect(x0, y0, rect_width, rect_height)); // using a rectangle
+//		cv::Mat temp_to_pass;
+//		temp.copyTo(temp_to_pass);
+
+		HierarchicalMovementSearch(depth+1, max_depth, temp);
+	}
 }
 
 

@@ -17,6 +17,7 @@ public:
 
 	void Update();
 	void SearchForMovement();
+	void SearchForMovement2(int resolution);
 
 	void DrawCurrent(const std::string& window_name);
 	void DrawPrevious(const std::string& window_name);
@@ -26,6 +27,7 @@ public:
 
 private:
 	void Init();
+	void HierarchicalMovementSearch(int depth, int max_depth, cv::Mat& partial_threshold_img);
 
 
 private:
@@ -35,7 +37,7 @@ private:
 	cv::Mat m_Current_Frame_gscl, m_Prev_Frame_gscl; // grayscale images
 	cv::Mat m_Diff, m_Threshold_img;
 
-	int m_X, m_Y; // coordinates of the detected object
+	int m_X=0, m_Y=0; // coordinates of the detected object
 
 };
 
